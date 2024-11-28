@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String?
+  email     String?  @unique
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tweets Tweet[] @relation("UserTweets") // User와 Tweet의 관계
+  likes  Like[]  @relation("UserLikes") // User와 Like의 관계
+}
+
+model Tweet {
+  id        Int      @id @default(autoincrement())
+  tweet     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId Int
+  user   User @relation("UserTweets", fields: [userId], references: [id]) // User와의 관계
+
+  likes Like[] @relation("TweetLikes") // Tweet과 Like의 관계
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tweetId Int
+  userId  Int
+  tweet   Tweet @relation("TweetLikes", fields: [tweetId], references: [id]) // Tweet과의 관계
+  user    User  @relation("UserLikes", fields: [userId], references: [id]) // User와의 관계
+}
